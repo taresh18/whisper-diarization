@@ -4,4 +4,8 @@ __pycache__/
 *.wav
 *.mp3
 *.m4a
-
+temp_outputs/
+tts_dataset/
+*.pt
+*.pt.gz
+*.pt.tar*

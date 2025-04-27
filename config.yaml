@@ -1,0 +1,22 @@
+# Configuration for the Diarization Pipeline
+
+# Processing settings
+device: auto  # Options: "auto", "cuda", "cpu"
+batch_size: 8 # Batch size for Whisper and Alignment inference. Reduce if OOM, set 0 for non-batched Whisper.
+language: en # Target language ('en', 'es', etc.). null for auto-detection by Whisper.
+input_audio: /Workspace/tr/repos/orpheus-ft/data/jjk/Satoru.mp3
+
+# Model settings
+whisper_model: "deepdml/faster-whisper-large-v3-turbo-ct2" # Whisper model name (e.g., tiny, base, small, medium, large-v2, large-v3)
+demucs_model: htdemucs   # Demucs model for vocal separation
+suppress_numerals: false # Transcribe numbers as words (True/False)
+punctuation_model: kredor/punctuate-all # Model for punctuation restoration
+model_cache_directory: "/Workspace/tr/repos/livekit/conversify-speech/conversify/data/models_cache"
+
+# NeMo Diarization settings
+nemo_domain: telephonic # Type of audio domain for NeMo config ('telephonic', 'meeting', 'general')
+
+# Output/Temporary Files
+temp_directory_base: temp_outputs # Base name for the temporary directory 
+output_tts_directory: tts_dataset # Directory to save the final TTS dataset 
+minimum_chunk_duration_ms: 400 # Minimum duration (in ms) for audio chunks in TTS dataset (e.g., 1000 for 1 sec) 

@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import logging
 
 import nltk
 import wget
@@ -249,23 +250,41 @@ langs_to_iso = {
 }
 
 
-def create_config(output_dir):
-    DOMAIN_TYPE = "telephonic"
+def create_config(output_dir, domain_type="telephonic"):
+    """Creates NeMo config based on the specified domain type."""
+    # Use the provided domain_type to select the config file
+    # DOMAIN_TYPE = "telephonic"
     CONFIG_LOCAL_DIRECTORY = "nemo_msdd_configs"
-    CONFIG_FILE_NAME = f"diar_infer_{DOMAIN_TYPE}.yaml"
+    CONFIG_FILE_NAME = f"diar_infer_{domain_type}.yaml"
     MODEL_CONFIG_PATH = os.path.join(CONFIG_LOCAL_DIRECTORY, CONFIG_FILE_NAME)
-    if not os.path.exists(MODEL_CONFIG_PATH):
-        os.makedirs(CONFIG_LOCAL_DIRECTORY, exist_ok=True)
-        CONFIG_URL = f"https://raw.githubusercontent.com/NVIDIA/NeMo/main/examples/speaker_tasks/diarization/conf/inference/{CONFIG_FILE_NAME}"
-        MODEL_CONFIG_PATH = wget.download(CONFIG_URL, MODEL_CONFIG_PATH)
 
+    if not os.path.exists(MODEL_CONFIG_PATH):
+        logging.warning(f"NeMo config not found locally: {MODEL_CONFIG_PATH}. Attempting to download.")
+        # Fallback or specific download logic if needed
+        # For simplicity, we assume the config exists or handle error downstream
+        # Alternatively, download based on domain_type:
+        # os.makedirs(CONFIG_LOCAL_DIRECTORY, exist_ok=True)
+        # CONFIG_URL = f"https://raw.githubusercontent.com/NVIDIA/NeMo/main/examples/speaker_tasks/diarization/conf/inference/{CONFIG_FILE_NAME}"
+        # try:
+        #     MODEL_CONFIG_PATH = wget.download(CONFIG_URL, MODEL_CONFIG_PATH)
+        #     logging.info(f"Downloaded NeMo config to {MODEL_CONFIG_PATH}")
+        # except Exception as e:
+        #     logging.error(f"Failed to download NeMo config {CONFIG_URL}: {e}")
+        #     raise FileNotFoundError(f"Required NeMo config {MODEL_CONFIG_PATH} not found and download failed.")
+        # Check again after potential download attempt
+        if not os.path.exists(MODEL_CONFIG_PATH):
+             raise FileNotFoundError(f"Required NeMo config {MODEL_CONFIG_PATH} not found.")
+
+    logging.info(f"Loading NeMo config from: {MODEL_CONFIG_PATH}")
     config = OmegaConf.load(MODEL_CONFIG_PATH)
 
     data_dir = os.path.join(output_dir, "data")
     os.makedirs(data_dir, exist_ok=True)
 
+    # Ensure the manifest uses the mono_file.wav inside the specific output_dir
+    mono_audio_path = os.path.join(output_dir, "mono_file.wav")
     meta = {
-        "audio_filepath": os.path.join(output_dir, "mono_file.wav"),
+        "audio_filepath": mono_audio_path,
         "offset": 0,
         "duration": None,
         "label": "infer",
